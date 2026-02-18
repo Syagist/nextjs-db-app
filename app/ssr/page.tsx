@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import CreatePostButton from "@/app/components/CreatePostButton";
-
 export const dynamic = "force-dynamic"; // SSR
 
 export default async function SSRPage() {
