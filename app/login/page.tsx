@@ -5,11 +5,16 @@ import * as Yup from "yup";
 import AuthCard from "@/app/components/ui/AuthCard";
 import Input from "@/app/components/ui/Input";
 import { useState } from "react";
+import { localFetch } from "@/app/api/localFetch";
+import { encodeHashtags } from "@/app/utils/string";
+import ROUTES from "@/app/consts/routes";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [serverError, setServerError] = useState("");
   const [serverMessage, setServerMessage] = useState("");
-
+  const router = useRouter();
+  const from = useSearchParams().get("from");
   // Yup validation schema
   const validationSchema = Yup.object().shape({
     email: Yup.string().email("Invalid email").required("Email is required"),
@@ -19,20 +24,17 @@ export default function LoginPage() {
   const handleSubmit = async (values: { email: string; password: string }) => {
     setServerError("");
     setServerMessage("");
-
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await localFetch("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setServerError(data.error);
+      if (!res.accessToken) {
+        setServerError(res.message);
       } else {
         setServerMessage("Login successful");
+        router.push(from ? encodeHashtags(from) : ROUTES.myAccount);
       }
     } catch (err) {
       setServerError("Something went wrong");

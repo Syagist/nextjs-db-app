@@ -2,37 +2,40 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/schemas/auth";
+import { getAccessToken, setRefreshToken } from "@/app/utils/auth";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validate input
     const parseResult = loginSchema.safeParse(body);
-    if (!parseResult.success) {
+    if (!parseResult?.success) {
       return NextResponse.json(
-        { error: parseResult.error.errors.map((e) => e.message).join(", ") },
+        { error: parseResult.error.issues.map((e) => e.message) },
         { status: 400 },
       );
     }
 
     const { email, password } = parseResult.data;
-
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user)
+    if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 },
       );
-
+    }
     const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid)
+    if (!isValid) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 },
       );
+    }
 
-    return NextResponse.json({ message: "Login successful" });
+    const accessToken = await getAccessToken(user);
+    await setRefreshToken(user);
+
+    return NextResponse.json({ accessToken });
   } catch (err) {
     return NextResponse.json(
       { error: "Something went wrong" },
