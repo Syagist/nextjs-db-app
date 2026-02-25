@@ -1,0 +1,9 @@
+{
+  "AUTH_INVALID_CREDENTIALS": "Invalid email or password",
+  "AUTH_USER_EXISTS": "User already exists",
+  "AUTH_USER_CREATED": "User created",
+  "AUTH_REQUIRED": "You must be logged in",
+  "VALIDATION_REQUIRED": "This field is required",
+  "LOGIN_SUCCESS": "Login successful",
+  "GENERARL_SERVER_ERROR": "Something went wrong"
+}

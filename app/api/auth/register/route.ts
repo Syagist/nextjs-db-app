@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: "Email and password required" },
+        { error: "AUTH_INVALID_CREDENTIALS" },
         { status: 400 },
       );
     }
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
+        { error: "AUTH_USER_EXISTS" },
         { status: 400 },
       );
     }
@@ -34,10 +34,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ message: "User created" });
+    return NextResponse.json({ message: "AUTH_USER_CREATED" });
   } catch (error) {
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "GENERARL_SERVER_ERROR" },
       { status: 500 },
     );
   }

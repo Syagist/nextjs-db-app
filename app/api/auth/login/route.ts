@@ -20,14 +20,14 @@ export async function POST(req: Request) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "AUTH_INVALID_CREDENTIALS" },
         { status: 401 },
       );
     }
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
+        { error: "AUTH_INVALID_CREDENTIALS" },
         { status: 401 },
       );
     }
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ accessToken });
   } catch (err) {
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: "GENERARL_SERVER_ERROR" },
       { status: 500 },
     );
   }

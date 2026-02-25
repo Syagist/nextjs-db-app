@@ -1,29 +1,21 @@
 "use client";
 
-import { Formik, Form, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { localFetch } from "@/app/api/local-fetch";
 import AuthCard from "@/app/components/ui/AuthCard";
-import Input from "@/app/components/ui/Input";
-import { useState } from "react";
-import { localFetch } from "@/app/api/localFetch";
-import { encodeHashtags } from "@/app/utils/string";
+import FormikInput from "@/app/components/ui/forms/formik-input";
 import ROUTES from "@/app/consts/routes";
+import { encodeHashtags } from "@/app/utils/string";
+import { Form, Formik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getLoginFields } from "../consts/form-fields";
+import { getLoginInitialValues } from "../consts/form-initial-values";
+import { getLoginValidationSchema } from "../consts/validations";
 
 export default function LoginPage() {
-  const [serverError, setServerError] = useState("");
-  const [serverMessage, setServerMessage] = useState("");
   const router = useRouter();
   const from = useSearchParams().get("from");
-  // Yup validation schema
-  const validationSchema = Yup.object().shape({
-    email: Yup.string().email("Invalid email").required("Email is required"),
-    password: Yup.string().required("Password is required"),
-  });
 
   const handleSubmit = async (values: { email: string; password: string }) => {
-    setServerError("");
-    setServerMessage("");
     try {
       const res = await localFetch("/auth/login", {
         method: "POST",
@@ -31,52 +23,28 @@ export default function LoginPage() {
       });
 
       if (!res.accessToken) {
-        setServerError(res.message);
       } else {
-        setServerMessage("Login successful");
         router.push(from ? encodeHashtags(from) : ROUTES.myAccount);
       }
     } catch (err) {
-      setServerError("Something went wrong");
+      console.log("Something went wrong");
     }
   };
 
   return (
     <AuthCard title="Login">
       <Formik
-        initialValues={{ email: "", password: "" }}
-        validationSchema={validationSchema}
+        initialValues={getLoginInitialValues()}
+        validationSchema={getLoginValidationSchema()}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, handleChange, values }) => (
+        {({ isSubmitting }) => (
           <Form className="space-y-4">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="Enter your email"
-              name="email"
-              value={values.email}
-              onChange={handleChange}
-            />
-            <ErrorMessage
-              name="email"
-              component="div"
-              className="text-sm text-red-500"
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              placeholder="Enter your password"
-              name="password"
-              value={values.password}
-              onChange={handleChange}
-            />
-            <ErrorMessage
-              name="password"
-              component="div"
-              className="text-sm text-red-500"
-            />
+            {getLoginFields().map((field) => (
+              <div key={field.name}>
+                <FormikInput {...field} />
+              </div>
+            ))}
 
             <button
               type="submit"
@@ -85,15 +53,6 @@ export default function LoginPage() {
             >
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
-
-            {serverError && (
-              <p className="text-sm text-red-500 text-center">{serverError}</p>
-            )}
-            {serverMessage && (
-              <p className="text-sm text-green-500 text-center">
-                {serverMessage}
-              </p>
-            )}
           </Form>
         )}
       </Formik>
