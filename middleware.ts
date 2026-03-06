@@ -1,40 +1,88 @@
-import { jwtVerify } from "jose";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken } from '@/lib/auth'
+import { Role } from '@/types'
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-
-const PROTECTED_ROUTES = ["/my-account"];
-const AUTH_ROUTES = ["/login", "/register"];
+const AUTH_ROUTES = ['/login', '/register']
+const ADMIN_ROUTES = ['/admin']
+const HOTEL_ROUTES = ['/hotel']
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const token = req.cookies.get("access_token")?.value;
+  const { pathname } = req.nextUrl
+  const token = req.cookies.get('access_token')?.value
 
-  const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
-  const isAuthRoute = AUTH_ROUTES.some((r) => pathname.startsWith(r));
-
-  let isAuthenticated = false;
+  let payload = null
   if (token) {
-    try {
-      await jwtVerify(token, secret);
-      isAuthenticated = true;
-    } catch {}
+    payload = await verifyToken(token)
   }
 
-  if (isProtected && !isAuthenticated) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("from", pathname);
-    return NextResponse.redirect(url);
+  const isAuthenticated = payload !== null
+  const role: Role | null = payload?.role ?? null
+
+  // Auth routes: redirect authenticated users to their dashboard
+  if (AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
+    if (isAuthenticated) {
+      return NextResponse.redirect(new URL(getDashboardUrl(payload!.role, payload!.hotelId), req.url))
+    }
+    return NextResponse.next()
   }
 
-  if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL("/my-account", req.url));
+  // Admin routes: require SUPER_ADMIN
+  if (ADMIN_ROUTES.some((r) => pathname.startsWith(r))) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL(`/login?from=${pathname}`, req.url))
+    }
+    if (role !== 'SUPER_ADMIN') {
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+    return NextResponse.next()
   }
 
-  return NextResponse.next();
+  // Hotel workspace routes: require any hotel role
+  if (HOTEL_ROUTES.some((r) => pathname.startsWith(r))) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL(`/login?from=${pathname}`, req.url))
+    }
+
+    const hotelRoles: Role[] = ['OWNER', 'MANAGER', 'RECEPTIONIST', 'KITCHEN']
+    if (!hotelRoles.includes(role!)) {
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+
+    // Extract hotelId from URL: /hotel/[hotelId]/...
+    const segments = pathname.split('/')
+    const hotelIdFromUrl = segments[2]
+
+    if (role !== 'SUPER_ADMIN' && payload!.hotelId !== hotelIdFromUrl) {
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+
+    return NextResponse.next()
+  }
+
+  // Pending page: require authenticated non-super-admin
+  if (pathname.startsWith('/pending')) {
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/login', req.url))
+    }
+    return NextResponse.next()
+  }
+
+  return NextResponse.next()
+}
+
+function getDashboardUrl(role: Role, hotelId: string | null): string {
+  if (role === 'SUPER_ADMIN') return '/admin'
+  if (hotelId) return `/hotel/${hotelId}/dashboard`
+  return '/pending'
 }
 
 export const config = {
-  matcher: ["/my-account/:path*", "/login", "/register"],
-};
+  matcher: [
+    '/admin/:path*',
+    '/hotel/:path*',
+    '/login',
+    '/register',
+    '/pending',
+    '/unauthorized',
+  ],
+}

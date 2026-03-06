@@ -1,28 +1,127 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
+}
+
+enum Role {
+  SUPER_ADMIN
+  OWNER
+  MANAGER
+  RECEPTIONIST
+  KITCHEN
+}
+
+enum HotelStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  SERVED
+  CANCELLED
 }
 
 model User {
-    id        String   @id @default(uuid())
-    email     String   @unique
-    password  String
-    avatarUrl String?
-    name      String?
-    createdAt DateTime @default(now())
-
-    posts Post[] 
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(RECEPTIONIST)
+  hotelId   String?
+  hotel     Hotel?   @relation(fields: [hotelId], references: [id])
+  createdAt DateTime @default(now())
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    title     String
-    content   String
-    createdAt DateTime @default(now())
+model Hotel {
+  id          String      @id @default(uuid())
+  name        String
+  location    String
+  description String?
+  status      HotelStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
 
-    userId String
-    user   User   @relation(fields: [userId], references: [id])
+  users     User[]
+  rooms     Room[]
+  bookings  Booking[]
+  menuItems MenuItem[]
+  orders    Order[]
+}
+
+model Room {
+  id       String     @id @default(uuid())
+  hotelId  String
+  hotel    Hotel      @relation(fields: [hotelId], references: [id])
+  name     String
+  type     String
+  price    Decimal    @db.Decimal(10, 2)
+  capacity Int
+  images   String[]
+  status   RoomStatus @default(AVAILABLE)
+
+  bookings Booking[]
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  hotelId    String
+  hotel      Hotel         @relation(fields: [hotelId], references: [id])
+  roomId     String
+  room       Room          @relation(fields: [roomId], references: [id])
+  guestName  String
+  guestPhone String
+  checkIn    DateTime
+  checkOut   DateTime
+  status     BookingStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+}
+
+model MenuItem {
+  id       String  @id @default(uuid())
+  hotelId  String
+  hotel    Hotel   @relation(fields: [hotelId], references: [id])
+  name     String
+  price    Decimal @db.Decimal(10, 2)
+  category String
+}
+
+model Order {
+  id         String      @id @default(uuid())
+  hotelId    String
+  hotel      Hotel       @relation(fields: [hotelId], references: [id])
+  roomNumber String
+  total      Decimal     @db.Decimal(10, 2)
+  status     OrderStatus @default(PENDING)
+  createdAt  DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItemId String
+  name       String
+  price      Decimal  @db.Decimal(10, 2)
+  quantity   Int
 }

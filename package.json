@@ -6,9 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "migreate-generate": "npx prisma migrate dev --name init && npx prisma generate",
+    "migrate": "npx prisma migrate dev --name init && npx prisma generate",
     "reset-db": "npx prisma migrate reset",
+    "seed": "npx tsx prisma/seed.ts",
     "lint": "eslint"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.0",
