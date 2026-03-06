@@ -2,13 +2,13 @@
 import { localFetch } from "@/app/api/local-fetch";
 import AuthCard from "@/app/components/ui/AuthCard";
 import FormikInput from "@/app/components/ui/forms/formik-input";
-import ROUTES from "@/app/consts/routes";
-import { encodeHashtags } from "@/app/utils/string";
+import ROUTES from "@/consts/routes";
+import { encodeHashtags } from "@/utils/string";
 import { Form, Formik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getRegisterFields } from "../consts/form-fields";
-import { getRegisterInitialValues } from "../consts/form-initial-values";
-import { getRegisterValidationSchema } from "../consts/validations";
+import { getRegisterFields } from "../../consts/form-fields";
+import { getRegisterInitialValues } from "../../consts/form-initial-values";
+import { getRegisterValidationSchema } from "../../consts/validations";
 import { useTranslations } from "next-intl";
 export default function RegisterPage() {
   const router = useRouter();

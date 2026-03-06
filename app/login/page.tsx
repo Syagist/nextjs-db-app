@@ -3,13 +3,13 @@
 import { localFetch } from "@/app/api/local-fetch";
 import AuthCard from "@/app/components/ui/AuthCard";
 import FormikInput from "@/app/components/ui/forms/formik-input";
-import ROUTES from "@/app/consts/routes";
-import { encodeHashtags } from "@/app/utils/string";
+import ROUTES from "@/consts/routes";
+import { encodeHashtags } from "@/utils/string";
 import { Form, Formik } from "formik";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getLoginFields } from "../consts/form-fields";
-import { getLoginInitialValues } from "../consts/form-initial-values";
-import { getLoginValidationSchema } from "../consts/validations";
+import { getLoginFields } from "../../consts/form-fields";
+import { getLoginInitialValues } from "../../consts/form-initial-values";
+import { getLoginValidationSchema } from "../../consts/validations";
 
 export default function LoginPage() {
   const router = useRouter();

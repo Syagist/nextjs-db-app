@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/schemas/auth";
-import { getAccessToken, setRefreshToken } from "@/app/utils/auth";
+import { getAccessToken, setRefreshToken } from "@/utils/auth";
 
 export async function POST(req: Request) {
   try {

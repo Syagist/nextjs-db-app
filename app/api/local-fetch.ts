@@ -1,7 +1,7 @@
 import { getCookie } from "cookies-next";
 
-import { COOKIES } from "@/app/types/enums";
-import { CustomError } from "@/app/utils/errors";
+import { COOKIES } from "@/types/enums";
+import { CustomError } from "@/utils/errors";
 
 export const localFetch = async <T>(
   url: string,
