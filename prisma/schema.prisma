@@ -53,30 +53,45 @@ model User {
 }
 
 model Hotel {
-  id          String      @id @default(uuid())
-  name        String
-  location    String
-  description String?
-  status      HotelStatus @default(PENDING)
-  createdAt   DateTime    @default(now())
+  id           String      @id @default(uuid())
+  name         String
+  slug         String      @unique
+  location     String
+  description  String?
+  heroImage    String?
+  amenities    String[]
+  contactEmail String?
+  contactPhone String?
+  status       HotelStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
 
   users     User[]
   rooms     Room[]
   bookings  Booking[]
   menuItems MenuItem[]
   orders    Order[]
+  images    HotelImage[]
+}
+
+model HotelImage {
+  id      String  @id @default(uuid())
+  hotelId String
+  hotel   Hotel   @relation(fields: [hotelId], references: [id])
+  url     String
+  altText String?
 }
 
 model Room {
-  id       String     @id @default(uuid())
-  hotelId  String
-  hotel    Hotel      @relation(fields: [hotelId], references: [id])
-  name     String
-  type     String
-  price    Decimal    @db.Decimal(10, 2)
-  capacity Int
-  images   String[]
-  status   RoomStatus @default(AVAILABLE)
+  id          String     @id @default(uuid())
+  hotelId     String
+  hotel       Hotel      @relation(fields: [hotelId], references: [id])
+  name        String
+  type        String
+  description String?
+  price       Decimal    @db.Decimal(10, 2)
+  capacity    Int
+  images      String[]
+  status      RoomStatus @default(AVAILABLE)
 
   bookings Booking[]
 }
@@ -96,12 +111,14 @@ model Booking {
 }
 
 model MenuItem {
-  id       String  @id @default(uuid())
-  hotelId  String
-  hotel    Hotel   @relation(fields: [hotelId], references: [id])
-  name     String
-  price    Decimal @db.Decimal(10, 2)
-  category String
+  id          String  @id @default(uuid())
+  hotelId     String
+  hotel       Hotel   @relation(fields: [hotelId], references: [id])
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  category    String
+  image       String?
 }
 
 model Order {

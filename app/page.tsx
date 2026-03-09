@@ -7,9 +7,11 @@ async function getApprovedHotels() {
     where: { status: 'APPROVED' },
     select: {
       id: true,
+      slug: true,
       name: true,
       location: true,
       description: true,
+      heroImage: true,
       _count: { select: { rooms: true } },
     },
     orderBy: { name: 'asc' },
@@ -82,10 +84,10 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {hotels.map((hotel: { id: string; name: string; location: string; description: string | null; _count: { rooms: number } }) => (
+            {hotels.map((hotel: { id: string; slug: string; name: string; location: string; description: string | null; heroImage: string | null; _count: { rooms: number } }) => (
               <Link
                 key={hotel.id}
-                href={`/hotels/${hotel.id}`}
+                href={`/stay/${hotel.slug}`}
                 className="group rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md hover:ring-blue-200"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 text-xl font-bold">
