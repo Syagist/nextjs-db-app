@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/Badge'
+import { Modal, ModalFooter } from '@/components/ui/Modal'
+import { FormField, Input } from '@/components/ui/Field'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { Order, OrderStatus, MenuItem } from '@/types'
 
 const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
@@ -34,16 +37,25 @@ export default function OrdersPage() {
 
   useEffect(() => { fetchAll() }, [fetchAll])
 
+  function closeForm() {
+    setShowForm(false)
+    setRoomNumber('')
+    setSelectedItems([])
+  }
+
   function toggleItem(menuItemId: string) {
     setSelectedItems((prev) => {
-      const existing = prev.find((i) => i.menuItemId === menuItemId)
-      if (existing) return prev.filter((i) => i.menuItemId !== menuItemId)
-      return [...prev, { menuItemId, quantity: 1 }]
+      const exists = prev.find((i) => i.menuItemId === menuItemId)
+      return exists
+        ? prev.filter((i) => i.menuItemId !== menuItemId)
+        : [...prev, { menuItemId, quantity: 1 }]
     })
   }
 
   function setQty(menuItemId: string, qty: number) {
-    setSelectedItems((prev) => prev.map((i) => i.menuItemId === menuItemId ? { ...i, quantity: qty } : i))
+    setSelectedItems((prev) =>
+      prev.map((i) => i.menuItemId === menuItemId ? { ...i, quantity: qty } : i)
+    )
   }
 
   async function handleCreate(e: { preventDefault(): void }) {
@@ -56,10 +68,8 @@ export default function OrdersPage() {
       body: JSON.stringify({ roomNumber, items: selectedItems }),
     })
     await fetchAll()
-    setShowForm(false)
     setSaving(false)
-    setRoomNumber('')
-    setSelectedItems([])
+    closeForm()
   }
 
   async function updateStatus(id: string, status: OrderStatus) {
@@ -73,60 +83,64 @@ export default function OrdersPage() {
 
   return (
     <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
-          <p className="mt-1 text-sm text-slate-500">In-room dining orders</p>
-        </div>
-        <button onClick={() => setShowForm(true)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          New Order
-        </button>
-      </div>
+      <PageHeader
+        title="Orders"
+        subtitle="In-room dining orders"
+        action={{ label: 'New Order', onClick: () => setShowForm(true) }}
+      />
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="mb-5 text-lg font-bold text-slate-900">New Room Order</h2>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Room Number</label>
-                <input value={roomNumber} onChange={(e) => setRoomNumber(e.target.value)} required placeholder="e.g. 201"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500" />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Select Items</label>
-                <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-200 p-3">
-                  {menuItems.map((item) => {
-                    const sel = selectedItems.find((i) => i.menuItemId === item.id)
-                    return (
-                      <div key={item.id} className="flex items-center gap-3">
-                        <input type="checkbox" checked={!!sel} onChange={() => toggleItem(item.id)}
-                          className="h-4 w-4 rounded border-slate-300" />
-                        <span className="flex-1 text-sm text-slate-700">{item.name}</span>
-                        <span className="text-sm font-medium text-slate-500">${Number(item.price).toFixed(2)}</span>
-                        {sel && (
-                          <input type="number" min={1} value={sel.quantity} onChange={(e) => setQty(item.id, Number(e.target.value))}
-                            className="w-16 rounded border border-slate-200 px-2 py-1 text-sm text-center outline-none focus:border-blue-500" />
-                        )}
-                      </div>
-                    )
-                  })}
-                  {menuItems.length === 0 && <p className="py-2 text-center text-sm text-slate-400">No menu items available.</p>}
-                </div>
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button type="submit" disabled={saving || !selectedItems.length}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60">
-                  {saving ? 'Placing...' : 'Place Order'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Modal isOpen={showForm} onClose={closeForm} title="New Room Order" width="lg">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <FormField label="Room Number">
+            <Input
+              value={roomNumber}
+              onChange={(e) => setRoomNumber(e.target.value)}
+              required
+              placeholder="e.g. 201"
+            />
+          </FormField>
+
+          <FormField label="Select Items">
+            <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-200 p-3">
+              {menuItems.map((item) => {
+                const sel = selectedItems.find((i) => i.menuItemId === item.id)
+                return (
+                  <div key={item.id} className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={!!sel}
+                      onChange={() => toggleItem(item.id)}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                    <span className="flex-1 text-sm text-slate-700">{item.name}</span>
+                    <span className="text-sm font-medium text-slate-500">${Number(item.price).toFixed(2)}</span>
+                    {sel && (
+                      <input
+                        type="number"
+                        min={1}
+                        value={sel.quantity}
+                        onChange={(e) => setQty(item.id, Number(e.target.value))}
+                        className="w-16 rounded border border-slate-200 px-2 py-1 text-center text-sm outline-none focus:border-blue-500"
+                      />
+                    )}
+                  </div>
+                )
+              })}
+              {menuItems.length === 0 && (
+                <p className="py-2 text-center text-sm text-slate-400">No menu items available.</p>
+              )}
+            </div>
+          </FormField>
+
+          <ModalFooter
+            onCancel={closeForm}
+            saving={saving}
+            submitLabel="Place Order"
+            savingLabel="Placing..."
+            disabled={!selectedItems.length}
+          />
+        </form>
+      </Modal>
 
       <div className="rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
         {loading ? (
@@ -158,14 +172,18 @@ export default function OrdersPage() {
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         {next && (
-                          <button onClick={() => updateStatus(order.id, next)}
-                            className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200">
+                          <button
+                            onClick={() => updateStatus(order.id, next)}
+                            className="rounded-md bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-200"
+                          >
                             → {next}
                           </button>
                         )}
                         {order.status === 'PENDING' && (
-                          <button onClick={() => updateStatus(order.id, 'CANCELLED')}
-                            className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200">
+                          <button
+                            onClick={() => updateStatus(order.id, 'CANCELLED')}
+                            className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
+                          >
                             Cancel
                           </button>
                         )}
