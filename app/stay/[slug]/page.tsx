@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { prisma } from '@/lib/prisma'
+import { HotelStatus, RoomStatus } from '@/lib/constants'
 import { HeroSection } from '@/components/hotel-landing/HeroSection'
 import { HotelGallerySlider } from '@/components/hotel-landing/HotelGallerySlider'
 import { RoomsSection } from '@/components/hotel-landing/RoomsSection'
@@ -14,11 +15,11 @@ import { ContactSection } from '@/components/hotel-landing/ContactSection'
 async function getHotel(slug: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hotel = await (prisma as any).hotel.findUnique({
-    where: { slug, status: 'APPROVED' },
+    where: { slug, status: HotelStatus.APPROVED },
     include: {
       images: { orderBy: { id: 'asc' } },
       rooms: {
-        where: { status: 'AVAILABLE' },
+        where: { status: RoomStatus.AVAILABLE },
         orderBy: { price: 'asc' },
       },
       menuItems: {
@@ -34,7 +35,7 @@ async function getHotel(slug: string) {
 export async function generateStaticParams() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hotels = await (prisma as any).hotel.findMany({
-    where: { status: 'APPROVED' },
+    where: { status: HotelStatus.APPROVED },
     select: { slug: true },
   })
   return hotels.map((h: { slug: string }) => ({ slug: h.slug }))

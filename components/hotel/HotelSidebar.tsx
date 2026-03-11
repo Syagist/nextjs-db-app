@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { clsx } from 'clsx'
-import { Role } from '@/types'
+import type { Role } from '@/types'
+import { Role as RoleConst } from '@/lib/constants'
 
 interface HotelSidebarProps {
   hotelId: string
@@ -15,14 +16,14 @@ function getNavItems(hotelId: string, role: Role) {
   const base = `/hotel/${hotelId}`
   const all = [
     { href: `${base}/dashboard`, label: 'Dashboard' },
-    { href: `${base}/rooms`, label: 'Rooms', roles: ['OWNER', 'MANAGER', 'RECEPTIONIST'] },
-    { href: `${base}/bookings`, label: 'Bookings', roles: ['OWNER', 'MANAGER', 'RECEPTIONIST'] },
-    { href: `${base}/staff`, label: 'Staff', roles: ['OWNER', 'MANAGER'] },
-    { href: `${base}/menu`, label: 'Menu', roles: ['OWNER', 'MANAGER', 'KITCHEN'] },
-    { href: `${base}/orders`, label: 'Orders', roles: ['OWNER', 'MANAGER', 'KITCHEN', 'RECEPTIONIST'] },
+    { href: `${base}/rooms`, label: 'Rooms', roles: [RoleConst.OWNER, RoleConst.MANAGER, RoleConst.RECEPTIONIST] },
+    { href: `${base}/bookings`, label: 'Bookings', roles: [RoleConst.OWNER, RoleConst.MANAGER, RoleConst.RECEPTIONIST] },
+    { href: `${base}/staff`, label: 'Staff', roles: [RoleConst.OWNER, RoleConst.MANAGER] },
+    { href: `${base}/menu`, label: 'Menu', roles: [RoleConst.OWNER, RoleConst.MANAGER, RoleConst.KITCHEN] },
+    { href: `${base}/orders`, label: 'Orders', roles: [RoleConst.OWNER, RoleConst.MANAGER, RoleConst.KITCHEN, RoleConst.RECEPTIONIST] },
     { href: `${base}/overview`, label: 'Overview' },
   ]
-  return all.filter((item) => !item.roles || item.roles.includes(role))
+  return all.filter((item) => !item.roles || (item.roles as string[]).includes(role))
 }
 
 export function HotelSidebar({ hotelId, hotelName, role }: HotelSidebarProps) {

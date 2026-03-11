@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyRequestToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Role } from '@/lib/constants'
 
 export async function GET(req: NextRequest) {
   const payload = await verifyRequestToken(req)
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
+  if (!payload || payload.role !== Role.SUPER_ADMIN) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

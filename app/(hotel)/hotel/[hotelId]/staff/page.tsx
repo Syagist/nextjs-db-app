@@ -6,10 +6,10 @@ import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { StaffMember, Role } from '@/types'
-import { ASSIGNABLE_ROLES } from '@/lib/constants'
+import type { StaffMember, Role } from '@/types'
+import { ASSIGNABLE_ROLES, Role as RoleConst } from '@/lib/constants'
 
-const DEFAULT_FORM = { name: '', email: '', password: '', role: 'RECEPTIONIST' as Role }
+const DEFAULT_FORM = { name: '', email: '', password: '', role: RoleConst.RECEPTIONIST as Role }
 
 export default function StaffPage() {
   const { hotelId } = useParams<{ hotelId: string }>()

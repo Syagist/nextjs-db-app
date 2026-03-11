@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/auth";
 import { TokenPayload } from "@/types";
+import { HotelStatus, Role } from "@/lib/constants";
 
 const registerSchema = z.object({
   email: z.email("Invalid email"),
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
           slug: `${hotelName}-${hotelLocation}`,
           location: hotelLocation,
           description: hotelDescription ?? null,
-          status: "PENDING",
+          status: HotelStatus.PENDING,
         },
       });
 
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
           email,
           password: hashed,
           name,
-          role: "OWNER",
+          role: Role.OWNER,
           hotelId: newHotel.id,
         },
       });
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email,
-      role: "OWNER",
+      role: Role.OWNER,
       hotelId: hotel.id,
       name: user.name ?? null,
     };
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: "OWNER",
+          role: Role.OWNER,
           hotelId: hotel.id,
         },
       },

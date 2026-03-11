@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { HotelStatus, RoomStatus, BookingStatus } from '@/lib/constants'
 
 const bookingSchema = z.object({
   roomId: z.string().min(1, 'Room is required'),
@@ -29,7 +30,7 @@ export async function POST(
     const p = prisma as any
 
     const hotel = await p.hotel.findUnique({
-      where: { slug, status: 'APPROVED' },
+      where: { slug, status: HotelStatus.APPROVED },
       select: { id: true },
     })
     if (!hotel) {
@@ -43,7 +44,7 @@ export async function POST(
     if (!room) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 })
     }
-    if (room.status !== 'AVAILABLE') {
+    if (room.status !== RoomStatus.AVAILABLE) {
       return NextResponse.json({ error: 'Room is not available' }, { status: 409 })
     }
 
@@ -65,7 +66,7 @@ export async function POST(
         guestPhone,
         checkIn: checkInDate,
         checkOut: checkOutDate,
-        status: 'PENDING',
+        status: BookingStatus.PENDING,
       },
     })
 

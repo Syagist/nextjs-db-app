@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { RoomStatus, BookingStatus, OrderStatus } from '@/lib/constants'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ hotelId: string }> }) {
   const payload = await verifyRequestToken(req)
@@ -21,12 +22,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ hote
   const [totalRooms, availableRooms, totalBookings, activeBookings, todayCheckIns, todayCheckOuts, pendingOrders, recentBookings] =
     await Promise.all([
       p.room.count({ where: { hotelId } }),
-      p.room.count({ where: { hotelId, status: 'AVAILABLE' } }),
+      p.room.count({ where: { hotelId, status: RoomStatus.AVAILABLE } }),
       p.booking.count({ where: { hotelId } }),
-      p.booking.count({ where: { hotelId, status: { in: ['CONFIRMED', 'CHECKED_IN'] } } }),
+      p.booking.count({ where: { hotelId, status: { in: [BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN] } } }),
       p.booking.count({ where: { hotelId, checkIn: { gte: today, lt: tomorrow } } }),
       p.booking.count({ where: { hotelId, checkOut: { gte: today, lt: tomorrow } } }),
-      p.order.count({ where: { hotelId, status: { in: ['PENDING', 'PREPARING'] } } }),
+      p.order.count({ where: { hotelId, status: { in: [OrderStatus.PENDING, OrderStatus.PREPARING] } } }),
       p.booking.findMany({
         where: { hotelId },
         include: { room: { select: { name: true } } },

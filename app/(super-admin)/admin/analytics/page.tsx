@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { StatsCard } from '@/components/ui/StatsCard'
+import { HotelStatus, Role } from '@/lib/constants'
 
 async function getAnalytics() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -7,10 +8,10 @@ async function getAnalytics() {
   const [totalHotels, pendingHotels, approvedHotels, rejectedHotels, totalUsers, totalBookings, totalOrders, totalRooms] =
     await Promise.all([
       p.hotel.count(),
-      p.hotel.count({ where: { status: 'PENDING' } }),
-      p.hotel.count({ where: { status: 'APPROVED' } }),
-      p.hotel.count({ where: { status: 'REJECTED' } }),
-      p.user.count({ where: { role: { not: 'SUPER_ADMIN' } } }),
+      p.hotel.count({ where: { status: HotelStatus.PENDING } }),
+      p.hotel.count({ where: { status: HotelStatus.APPROVED } }),
+      p.hotel.count({ where: { status: HotelStatus.REJECTED } }),
+      p.user.count({ where: { role: { not: Role.SUPER_ADMIN } } }),
       p.booking.count(),
       p.order.count(),
       p.room.count(),

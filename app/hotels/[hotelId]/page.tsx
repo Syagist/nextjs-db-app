@@ -2,12 +2,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { Badge } from '@/components/ui/Badge'
-import { RoomStatus } from '@/types'
+import type { RoomStatus } from '@/types'
+import { HotelStatus, RoomStatus as RS } from '@/lib/constants'
 
 async function getHotel(id: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const hotel = await (prisma as any).hotel.findUnique({
-    where: { id, status: 'APPROVED' },
+    where: { id, status: HotelStatus.APPROVED },
     include: {
       rooms: {
         select: { id: true, name: true, type: true, price: true, capacity: true, status: true },
@@ -24,7 +25,7 @@ export default async function PublicHotelPage({ params }: { params: Promise<{ ho
 
   if (!hotel) notFound()
 
-  const availableRooms = hotel.rooms.filter((r: { status: RoomStatus }) => r.status === 'AVAILABLE')
+  const availableRooms = hotel.rooms.filter((r: { status: RoomStatus }) => r.status === RS.AVAILABLE)
 
   return (
     <div className="min-h-screen bg-slate-50">

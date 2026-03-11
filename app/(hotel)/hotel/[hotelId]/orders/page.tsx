@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Order, OrderStatus, MenuItem } from '@/types'
-import { ORDER_STATUS_FLOW } from '@/lib/constants'
+import type { Order, OrderStatus, MenuItem } from '@/types'
+import { ORDER_STATUS_FLOW, OrderStatus as OS } from '@/lib/constants'
 
 export default function OrdersPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -173,9 +173,9 @@ export default function OrdersPage() {
                             → {next}
                           </button>
                         )}
-                        {order.status === 'PENDING' && (
+                        {order.status === OS.PENDING && (
                           <button
-                            onClick={() => updateStatus(order.id, 'CANCELLED')}
+                            onClick={() => updateStatus(order.id, OS.CANCELLED)}
                             className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
                           >
                             Cancel

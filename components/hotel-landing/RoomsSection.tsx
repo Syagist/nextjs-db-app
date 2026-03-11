@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { RoomStatus } from '@/lib/constants'
 
 interface Room {
   id: string
@@ -32,7 +33,7 @@ function CapacityIcon() {
 }
 
 export function RoomsSection({ rooms }: RoomsSectionProps) {
-  const available = rooms.filter((r) => r.status === 'AVAILABLE')
+  const available = rooms.filter((r) => r.status === RoomStatus.AVAILABLE)
 
   return (
     <section id="rooms" className="bg-white py-24">

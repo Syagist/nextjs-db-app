@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getTokenFromCookies } from '@/lib/auth'
-import { HOTEL_ROLES } from '@/lib/constants'
+import { HOTEL_ROLES, HotelStatus } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 import { HotelSidebar } from '@/components/hotel/HotelSidebar'
 
@@ -30,7 +30,7 @@ export default async function HotelLayout({
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <HotelSidebar hotelId={hotelId} hotelName={hotel.name} role={payload.role} />
       <main className="flex-1 overflow-y-auto">
-        {hotel.status !== 'APPROVED' && (
+        {hotel.status !== HotelStatus.APPROVED && (
           <div className="border-b border-yellow-200 bg-yellow-50 px-6 py-3 text-sm text-yellow-800">
             This hotel is currently <strong>{hotel.status.toLowerCase()}</strong> and not publicly visible.
           </div>

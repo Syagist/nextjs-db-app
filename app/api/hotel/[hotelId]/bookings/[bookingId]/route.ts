@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { CAN_DELETE_BOOKING, BOOKING_STATUSES } from '@/lib/constants'
+import { CAN_DELETE_BOOKING, BOOKING_STATUSES, BookingStatus, RoomStatus } from '@/lib/constants'
 
 const updateSchema = z.object({
   status: z.enum(BOOKING_STATUSES as [string, ...string[]]).optional(),
@@ -51,8 +51,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   // Auto-sync room status: CHECKED_IN → OCCUPIED, CHECKED_OUT/CANCELLED → AVAILABLE
   if (parsed.data.status && existing?.roomId) {
     const roomStatus =
-      parsed.data.status === 'CHECKED_IN' ? 'OCCUPIED' :
-      parsed.data.status === 'CHECKED_OUT' || parsed.data.status === 'CANCELLED' ? 'AVAILABLE' :
+      parsed.data.status === BookingStatus.CHECKED_IN ? RoomStatus.OCCUPIED :
+      parsed.data.status === BookingStatus.CHECKED_OUT || parsed.data.status === BookingStatus.CANCELLED ? RoomStatus.AVAILABLE :
       null
     if (roomStatus) {
       await p.room.update({ where: { id: existing.roomId }, data: { status: roomStatus } })

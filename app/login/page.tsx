@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Role } from '@/lib/constants'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -31,7 +32,7 @@ export default function LoginPage() {
       }
 
       const { user } = data
-      if (user.role === 'SUPER_ADMIN') {
+      if (user.role === Role.SUPER_ADMIN) {
         router.push('/admin')
       } else if (user.hotelId) {
         router.push(`/hotel/${user.hotelId}/dashboard`)

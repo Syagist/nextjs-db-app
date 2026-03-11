@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { CAN_MANAGE_BOOKINGS } from '@/lib/constants'
+import { CAN_MANAGE_BOOKINGS, BookingStatus } from '@/lib/constants'
 
 const createSchema = z.object({
   roomId: z.string().min(1),
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hot
       guestPhone,
       checkIn: new Date(checkIn),
       checkOut: new Date(checkOut),
-      status: 'PENDING',
+      status: BookingStatus.PENDING,
     },
     include: { room: { select: { id: true, name: true, type: true } } },
   })

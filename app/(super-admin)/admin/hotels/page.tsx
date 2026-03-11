@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
-import { HotelStatus } from '@/types'
+import type { HotelStatus as HotelStatusType } from '@/types'
+import { HotelStatus } from '@/lib/constants'
 
 interface Hotel {
   id: string
@@ -11,7 +12,7 @@ interface Hotel {
   slug: string
   location: string
   description: string | null
-  status: HotelStatus
+  status: HotelStatusType
   createdAt: string
   _count: { users: number; rooms: number; bookings: number }
 }
@@ -30,7 +31,7 @@ export default function AdminHotelsPage() {
 
   useEffect(() => { fetchHotels() }, [fetchHotels])
 
-  async function updateStatus(id: string, status: HotelStatus) {
+  async function updateStatus(id: string, status: HotelStatusType) {
     setUpdating(id)
     await fetch(`/api/admin/hotels/${id}`, {
       method: 'PATCH',
@@ -69,7 +70,7 @@ export default function AdminHotelsPage() {
                   <td className="px-6 py-4">
                     <p className="font-medium text-slate-900">{hotel.name}</p>
                     <p className="text-xs text-slate-400">{hotel.location}</p>
-                    {hotel.status === 'APPROVED' && hotel.slug && (
+                    {hotel.status === HotelStatus.APPROVED && hotel.slug && (
                       <Link
                         href={`/stay/${hotel.slug}`}
                         target="_blank"
@@ -87,27 +88,27 @@ export default function AdminHotelsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      {hotel.status !== 'APPROVED' && (
+                      {hotel.status !== HotelStatus.APPROVED && (
                         <button
-                          onClick={() => updateStatus(hotel.id, 'APPROVED')}
+                          onClick={() => updateStatus(hotel.id, HotelStatus.APPROVED)}
                           disabled={updating === hotel.id}
                           className="rounded-md bg-green-100 px-3 py-1 text-xs font-medium text-green-700 transition hover:bg-green-200 disabled:opacity-50"
                         >
                           Approve
                         </button>
                       )}
-                      {hotel.status !== 'REJECTED' && (
+                      {hotel.status !== HotelStatus.REJECTED && (
                         <button
-                          onClick={() => updateStatus(hotel.id, 'REJECTED')}
+                          onClick={() => updateStatus(hotel.id, HotelStatus.REJECTED)}
                           disabled={updating === hotel.id}
                           className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 transition hover:bg-red-200 disabled:opacity-50"
                         >
                           Reject
                         </button>
                       )}
-                      {hotel.status !== 'PENDING' && (
+                      {hotel.status !== HotelStatus.PENDING && (
                         <button
-                          onClick={() => updateStatus(hotel.id, 'PENDING')}
+                          onClick={() => updateStatus(hotel.id, HotelStatus.PENDING)}
                           disabled={updating === hotel.id}
                           className="rounded-md bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700 transition hover:bg-yellow-200 disabled:opacity-50"
                         >

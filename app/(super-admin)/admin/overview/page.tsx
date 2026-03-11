@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection'
+import { RoomStatus, OrderStatus, HotelStatus } from '@/lib/constants'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -144,8 +145,8 @@ function OrdersTable({ orders }: { orders: OrderRow[] }) {
 
 function HotelCard({ hotel }: { hotel: HotelOverview }) {
   const [open, setOpen] = useState(false)
-  const availableRooms = hotel.rooms.filter((r) => r.status === 'AVAILABLE').length
-  const activeOrders = hotel.orders.filter((o) => o.status === 'PENDING' || o.status === 'PREPARING').length
+  const availableRooms = hotel.rooms.filter((r) => r.status === RoomStatus.AVAILABLE).length
+  const activeOrders = hotel.orders.filter((o) => o.status === OrderStatus.PENDING || o.status === OrderStatus.PREPARING).length
 
   return (
     <div className="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
@@ -193,7 +194,7 @@ function HotelCard({ hotel }: { hotel: HotelOverview }) {
           <CollapsibleSection
             title="Rooms"
             count={hotel.rooms.length}
-            href={hotel.status === 'APPROVED' ? undefined : undefined}
+            href={hotel.status === HotelStatus.APPROVED ? undefined : undefined}
             badge={availableRooms > 0 ? { label: `${availableRooms} available`, color: 'green' } : { label: 'all occupied', color: 'red' }}
           >
             <RoomsTable rooms={hotel.rooms} />

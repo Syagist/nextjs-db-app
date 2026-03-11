@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import { getTokenFromCookies } from '@/lib/auth'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { Role } from '@/lib/constants'
 
 export default async function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const payload = await getTokenFromCookies()
 
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
+  if (!payload || payload.role !== Role.SUPER_ADMIN) {
     redirect('/login')
   }
 

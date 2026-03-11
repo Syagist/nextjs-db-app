@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { HotelStatus } from '@/lib/constants'
 
 async function getApprovedHotels() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (prisma as any).hotel.findMany({
-    where: { status: 'APPROVED' },
+    where: { status: HotelStatus.APPROVED },
     select: {
       id: true,
       slug: true,

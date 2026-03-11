@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
 import { TokenPayload } from '@/types'
+import { Role } from '@/lib/constants'
 
 // Re-export so existing imports from '@/lib/auth' keep working
 export { HOTEL_ROLES, MANAGEMENT_ROLES } from '@/lib/constants'
@@ -43,6 +44,6 @@ export async function verifyRequestToken(req: NextRequest): Promise<TokenPayload
 }
 
 export function hasHotelAccess(payload: TokenPayload, hotelId: string): boolean {
-  if (payload.role === 'SUPER_ADMIN') return true
+  if (payload.role === Role.SUPER_ADMIN) return true
   return payload.hotelId === hotelId
 }

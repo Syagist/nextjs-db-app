@@ -1,7 +1,8 @@
 import { getTokenFromCookies } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { Role } from '@/types'
+import type { Role } from '@/types'
 import { HotelOverviewClient } from '@/components/hotel/HotelOverviewClient'
+import { Role as RoleConst } from '@/lib/constants'
 
 // Role → which sections to show
 const ROLE_SECTIONS: Record<Role, string[]> = {
@@ -29,7 +30,7 @@ async function getOverviewData(hotelId: string) {
       include: { room: { select: { name: true } } },
     }),
     p.user.findMany({
-      where: { hotelId, role: { not: 'SUPER_ADMIN' } },
+      where: { hotelId, role: { not: RoleConst.SUPER_ADMIN } },
       orderBy: { createdAt: 'asc' },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     }),
@@ -49,7 +50,7 @@ async function getOverviewData(hotelId: string) {
   ])
 
   return {
-    rooms,
+    rooms: rooms.map((r: { price: unknown; [key: string]: unknown }) => ({ ...r, price: Number(r.price) })),
     bookings: bookings.map((b: { checkIn: Date; checkOut: Date; [key: string]: unknown }) => ({
       ...b,
       checkIn: b.checkIn.toISOString(),
@@ -76,7 +77,7 @@ async function getOverviewData(hotelId: string) {
 export default async function HotelOverviewPage({ params }: { params: Promise<{ hotelId: string }> }) {
   const { hotelId } = await params
   const payload = await getTokenFromCookies()
-  const role = (payload?.role ?? 'RECEPTIONIST') as Role
+  const role = (payload?.role ?? RoleConst.RECEPTIONIST) as Role
   const sections = ROLE_SECTIONS[role] ?? ['rooms']
 
   const data = await getOverviewData(hotelId)

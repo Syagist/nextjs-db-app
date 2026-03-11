@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Booking, BookingStatus, Room } from '@/types'
-import { BOOKING_STATUSES, BOOKING_STATUS_FLOW } from '@/lib/constants'
+import type { Booking, BookingStatus, Room } from '@/types'
+import { BOOKING_STATUSES, BOOKING_STATUS_FLOW, BookingStatus as BS, RoomStatus } from '@/lib/constants'
 
 const DEFAULT_FORM = { roomId: '', guestName: '', guestPhone: '', checkIn: '', checkOut: '' }
 
@@ -20,17 +20,17 @@ const STATUS_FLOW = BOOKING_STATUS_FLOW
 
 // Map next-status → button label
 const ACTION_LABEL: Partial<Record<BookingStatus, ActionLabel>> = {
-  CONFIRMED: 'Confirm',
-  CHECKED_IN: 'Check In',
-  CHECKED_OUT: 'Check Out',
+  [BS.CONFIRMED]: 'Confirm',
+  [BS.CHECKED_IN]: 'Check In',
+  [BS.CHECKED_OUT]: 'Check Out',
 }
 
 // Map action label → statuses that have that action available
 const ACTION_STATUS_MAP: Record<ActionLabel, BookingStatus[]> = {
-  'Confirm':   ['PENDING'],
-  'Check In':  ['CONFIRMED'],
-  'Check Out': ['CHECKED_IN'],
-  'Cancel':    ['PENDING'],
+  'Confirm':   [BS.PENDING],
+  'Check In':  [BS.CONFIRMED],
+  'Check Out': [BS.CHECKED_IN],
+  'Cancel':    [BS.PENDING],
 }
 
 // ─── Filter bar ───────────────────────────────────────────────────────────────
@@ -297,7 +297,7 @@ export default function BookingsPage() {
           <FormField label="Room">
             <Select value={form.roomId} onChange={(e) => setField('roomId', e.target.value)} required>
               <option value="">Select a room</option>
-              {rooms.filter((r) => r.status === 'AVAILABLE').map((r) => (
+              {rooms.filter((r) => r.status === RoomStatus.AVAILABLE).map((r) => (
                 <option key={r.id} value={r.id}>{r.name} — ${Number(r.price)}/night</option>
               ))}
             </Select>
@@ -384,9 +384,9 @@ export default function BookingsPage() {
                             {ACTION_LABEL[next] ?? next.replace('_', ' ')}
                           </button>
                         )}
-                        {b.status === 'PENDING' && (
+                        {b.status === BS.PENDING && (
                           <button
-                            onClick={() => updateStatus(b.id, 'CANCELLED')}
+                            onClick={() => updateStatus(b.id, BS.CANCELLED)}
                             className="rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-200"
                           >
                             Cancel

@@ -6,10 +6,10 @@ import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { Room, RoomStatus } from '@/types'
-import { ROOM_TYPES } from '@/lib/constants'
+import type { Room, RoomStatus } from '@/types'
+import { ROOM_TYPES, RoomStatus as RS } from '@/lib/constants'
 
-const DEFAULT_FORM = { name: '', type: 'Standard', price: '', capacity: '', status: 'AVAILABLE' as RoomStatus }
+const DEFAULT_FORM = { name: '', type: 'Standard', price: '', capacity: '', status: RS.AVAILABLE as RoomStatus }
 
 export default function RoomsPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -93,9 +93,9 @@ export default function RoomsPage() {
             </FormField>
             <FormField label="Status">
               <Select value={form.status} onChange={(e) => set('status', e.target.value as RoomStatus)}>
-                <option value="AVAILABLE">Available</option>
-                <option value="OCCUPIED">Occupied</option>
-                <option value="MAINTENANCE">Maintenance</option>
+                <option value={RS.AVAILABLE}>Available</option>
+                <option value={RS.OCCUPIED}>Occupied</option>
+                <option value={RS.MAINTENANCE}>Maintenance</option>
               </Select>
             </FormField>
           </div>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { OrderStatus } from '@/lib/constants'
 
 const orderItemSchema = z.object({
   menuItemId: z.string().min(1),
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hot
       hotelId,
       roomNumber,
       total,
-      status: 'PENDING',
+      status: OrderStatus.PENDING,
       items: { create: orderItems },
     },
     include: { items: true },

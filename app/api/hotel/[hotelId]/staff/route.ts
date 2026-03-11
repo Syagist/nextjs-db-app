@@ -3,7 +3,7 @@ import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { CAN_VIEW_STAFF, CAN_MANAGE_STAFF, ASSIGNABLE_ROLES } from '@/lib/constants'
+import { CAN_VIEW_STAFF, CAN_MANAGE_STAFF, ASSIGNABLE_ROLES, Role } from '@/lib/constants'
 
 const createSchema = z.object({
   email: z.email(),
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ hote
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const staff = await (prisma as any).user.findMany({
-    where: { hotelId, role: { not: 'SUPER_ADMIN' } },
+    where: { hotelId, role: { not: Role.SUPER_ADMIN } },
     select: { id: true, email: true, name: true, role: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   })

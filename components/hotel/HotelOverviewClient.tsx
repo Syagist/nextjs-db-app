@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { CollapsibleSection } from '@/components/ui/CollapsibleSection'
-import { Role } from '@/types'
+import type { Role } from '@/types'
+import { Role as RoleConst, OrderStatus, RoomStatus, ACTIVE_BOOKING_STATUSES, ACTIVE_ORDER_STATUSES } from '@/lib/constants'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -171,7 +172,7 @@ function OrdersTable({ orders, hotelId, isKitchen }: { orders: OrderRow[]; hotel
   // Kitchen sees pending/preparing first
   const sorted = isKitchen
     ? [...orders].sort((a, b) => {
-        const priority: Record<string, number> = { PENDING: 0, PREPARING: 1, SERVED: 2, CANCELLED: 3 }
+        const priority: Record<string, number> = { [OrderStatus.PENDING]: 0, [OrderStatus.PREPARING]: 1, [OrderStatus.SERVED]: 2, [OrderStatus.CANCELLED]: 3 }
         return (priority[a.status] ?? 9) - (priority[b.status] ?? 9)
       })
     : orders
@@ -193,9 +194,9 @@ function OrdersTable({ orders, hotelId, isKitchen }: { orders: OrderRow[]; hotel
           <tr
             key={o.id}
             className={
-              isKitchen && o.status === 'PENDING'
+              isKitchen && o.status === OrderStatus.PENDING
                 ? 'bg-orange-50 hover:bg-orange-100'
-                : isKitchen && o.status === 'PREPARING'
+                : isKitchen && o.status === OrderStatus.PREPARING
                 ? 'bg-blue-50 hover:bg-blue-100'
                 : 'hover:bg-slate-50'
             }
@@ -226,11 +227,11 @@ function getSectionConfig(
   props: Props,
 ) {
   const { hotelId, rooms, bookings, staff, menuItems, orders } = props
-  const isKitchen = props.role === 'KITCHEN'
+  const isKitchen = props.role === RoleConst.KITCHEN
 
-  const activeBookings = bookings.filter((b) => ['CONFIRMED', 'CHECKED_IN', 'PENDING'].includes(b.status))
-  const availableRooms = rooms.filter((r) => r.status === 'AVAILABLE').length
-  const pendingOrders  = orders.filter((o) => o.status === 'PENDING' || o.status === 'PREPARING').length
+  const activeBookings = bookings.filter((b) => ACTIVE_BOOKING_STATUSES.includes(b.status as typeof ACTIVE_BOOKING_STATUSES[number]))
+  const availableRooms = rooms.filter((r) => r.status === RoomStatus.AVAILABLE).length
+  const pendingOrders  = orders.filter((o) => ACTIVE_ORDER_STATUSES.includes(o.status as typeof ACTIVE_ORDER_STATUSES[number])).length
 
   switch (key) {
     case 'rooms':

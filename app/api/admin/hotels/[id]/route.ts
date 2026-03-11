@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { Role, HOTEL_STATUSES } from '@/lib/constants'
 
 const updateSchema = z.object({
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
+  status: z.enum(HOTEL_STATUSES as [string, ...string[]]).optional(),
   name: z.string().min(1).optional(),
   location: z.string().min(1).optional(),
   description: z.string().optional(),
@@ -12,7 +13,7 @@ const updateSchema = z.object({
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const payload = await verifyRequestToken(req)
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
+  if (!payload || payload.role !== Role.SUPER_ADMIN) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const payload = await verifyRequestToken(req)
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
+  if (!payload || payload.role !== Role.SUPER_ADMIN) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -54,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const payload = await verifyRequestToken(req)
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
+  if (!payload || payload.role !== Role.SUPER_ADMIN) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
-import { CAN_MANAGE_ROOMS, ROOM_STATUSES } from '@/lib/constants'
+import { CAN_MANAGE_ROOMS, ROOM_STATUSES, RoomStatus } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 
 const createSchema = z.object({
@@ -10,7 +10,7 @@ const createSchema = z.object({
   price: z.number().positive(),
   capacity: z.number().int().positive(),
   images: z.array(z.string()).default([]),
-  status: z.enum(ROOM_STATUSES as [string, ...string[]]).default('AVAILABLE'),
+  status: z.enum(ROOM_STATUSES as [string, ...string[]]).default(RoomStatus.AVAILABLE),
 })
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ hotelId: string }> }) {

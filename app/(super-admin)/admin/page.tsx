@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { StatsCard } from '@/components/ui/StatsCard'
 import { Badge } from '@/components/ui/Badge'
-import { HotelStatus } from '@/types'
+import type { HotelStatus as HotelStatusType } from '@/types'
+import { HotelStatus, Role } from '@/lib/constants'
 
 async function getAnalytics() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,9 +10,9 @@ async function getAnalytics() {
   const [totalHotels, pendingHotels, approvedHotels, totalUsers, totalBookings, recentHotels] =
     await Promise.all([
       p.hotel.count(),
-      p.hotel.count({ where: { status: 'PENDING' } }),
-      p.hotel.count({ where: { status: 'APPROVED' } }),
-      p.user.count({ where: { role: { not: 'SUPER_ADMIN' } } }),
+      p.hotel.count({ where: { status: HotelStatus.PENDING } }),
+      p.hotel.count({ where: { status: HotelStatus.APPROVED } }),
+      p.user.count({ where: { role: { not: Role.SUPER_ADMIN } } }),
       p.booking.count(),
       p.hotel.findMany({
         orderBy: { createdAt: 'desc' },
@@ -49,7 +50,7 @@ export default async function AdminDashboardPage() {
           </a>
         </div>
         <div className="divide-y divide-slate-50">
-          {recentHotels.map((hotel: { id: string; name: string; location: string; status: HotelStatus; createdAt: Date }) => (
+          {recentHotels.map((hotel: { id: string; name: string; location: string; status: HotelStatusType; createdAt: Date }) => (
             <div key={hotel.id} className="flex items-center justify-between px-6 py-4">
               <div>
                 <p className="font-medium text-slate-900">{hotel.name}</p>

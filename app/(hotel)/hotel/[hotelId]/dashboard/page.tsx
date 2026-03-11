@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { getTokenFromCookies } from '@/lib/auth'
 import { StatsCard } from '@/components/ui/StatsCard'
 import { Badge } from '@/components/ui/Badge'
-import { BookingStatus } from '@/types'
+import type { BookingStatus } from '@/types'
+import { RoomStatus, BookingStatus as BS, OrderStatus } from '@/lib/constants'
 
 async function getDashboardData(hotelId: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,11 +16,11 @@ async function getDashboardData(hotelId: string) {
   const [totalRooms, availableRooms, activeBookings, todayCheckIns, todayCheckOuts, pendingOrders, recentBookings] =
     await Promise.all([
       p.room.count({ where: { hotelId } }),
-      p.room.count({ where: { hotelId, status: 'AVAILABLE' } }),
-      p.booking.count({ where: { hotelId, status: { in: ['CONFIRMED', 'CHECKED_IN'] } } }),
+      p.room.count({ where: { hotelId, status: RoomStatus.AVAILABLE } }),
+      p.booking.count({ where: { hotelId, status: { in: [BS.CONFIRMED, BS.CHECKED_IN] } } }),
       p.booking.count({ where: { hotelId, checkIn: { gte: today, lt: tomorrow } } }),
       p.booking.count({ where: { hotelId, checkOut: { gte: today, lt: tomorrow } } }),
-      p.order.count({ where: { hotelId, status: { in: ['PENDING', 'PREPARING'] } } }),
+      p.order.count({ where: { hotelId, status: { in: [OrderStatus.PENDING, OrderStatus.PREPARING] } } }),
       p.booking.findMany({
         where: { hotelId },
         include: { room: { select: { name: true } } },
