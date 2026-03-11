@@ -7,8 +7,7 @@ import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Room, RoomStatus } from '@/types'
-
-const ROOM_TYPES = ['Standard', 'Deluxe', 'Suite', 'Presidential', 'Family']
+import { ROOM_TYPES } from '@/lib/constants'
 
 const DEFAULT_FORM = { name: '', type: 'Standard', price: '', capacity: '', status: 'AVAILABLE' as RoomStatus }
 

@@ -7,13 +7,7 @@ import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Order, OrderStatus, MenuItem } from '@/types'
-
-const STATUS_FLOW: Record<OrderStatus, OrderStatus | null> = {
-  PENDING: 'PREPARING',
-  PREPARING: 'SERVED',
-  SERVED: null,
-  CANCELLED: null,
-}
+import { ORDER_STATUS_FLOW } from '@/lib/constants'
 
 export default function OrdersPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -159,7 +153,7 @@ export default function OrdersPage() {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {orders.map((order) => {
-                const next = STATUS_FLOW[order.status]
+                const next = ORDER_STATUS_FLOW[order.status]
                 return (
                   <tr key={order.id} className="hover:bg-slate-50">
                     <td className="px-6 py-4 font-medium text-slate-900">Room {order.roomNumber}</td>

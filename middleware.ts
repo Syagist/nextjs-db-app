@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
+import { HOTEL_ROLES } from '@/lib/constants'
 import { Role } from '@/types'
 
 const AUTH_ROUTES = ['/login', '/register']
@@ -43,8 +44,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL(`/login?from=${pathname}`, req.url))
     }
 
-    const hotelRoles: Role[] = ['OWNER', 'MANAGER', 'RECEPTIONIST', 'KITCHEN']
-    if (!hotelRoles.includes(role!)) {
+    if (!HOTEL_ROLES.includes(role!)) {
       return NextResponse.redirect(new URL('/unauthorized', req.url))
     }
 

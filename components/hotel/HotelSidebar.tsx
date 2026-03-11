@@ -20,6 +20,7 @@ function getNavItems(hotelId: string, role: Role) {
     { href: `${base}/staff`, label: 'Staff', roles: ['OWNER', 'MANAGER'] },
     { href: `${base}/menu`, label: 'Menu', roles: ['OWNER', 'MANAGER', 'KITCHEN'] },
     { href: `${base}/orders`, label: 'Orders', roles: ['OWNER', 'MANAGER', 'KITCHEN', 'RECEPTIONIST'] },
+    { href: `${base}/overview`, label: 'Overview' },
   ]
   return all.filter((item) => !item.roles || item.roles.includes(role))
 }

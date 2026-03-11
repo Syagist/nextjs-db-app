@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { CAN_MANAGE_STAFF, ASSIGNABLE_ROLES } from '@/lib/constants'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
-  role: z.enum(['MANAGER', 'RECEPTIONIST', 'KITCHEN']).optional(),
+  role: z.enum(ASSIGNABLE_ROLES as [string, ...string[]]).optional(),
 })
 
 type Params = { params: Promise<{ hotelId: string; staffId: string }> }
@@ -19,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_STAFF.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
@@ -48,7 +49,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_STAFF.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

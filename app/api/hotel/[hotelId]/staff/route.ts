@@ -3,12 +3,13 @@ import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { CAN_VIEW_STAFF, CAN_MANAGE_STAFF, ASSIGNABLE_ROLES } from '@/lib/constants'
 
 const createSchema = z.object({
   email: z.email(),
   password: z.string().min(6),
   name: z.string().min(1),
-  role: z.enum(['MANAGER', 'RECEPTIONIST', 'KITCHEN']),
+  role: z.enum(ASSIGNABLE_ROLES as [string, ...string[]]),
 })
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ hotelId: string }> }) {
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ hote
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'MANAGER', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_VIEW_STAFF.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hot
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_STAFF.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

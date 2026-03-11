@@ -1,7 +1,10 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { NextRequest } from 'next/server'
-import { TokenPayload, Role } from '@/types'
+import { TokenPayload } from '@/types'
+
+// Re-export so existing imports from '@/lib/auth' keep working
+export { HOTEL_ROLES, MANAGEMENT_ROLES } from '@/lib/constants'
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET ?? 'hotel-platform-secret-change-in-production')
 
@@ -43,6 +46,3 @@ export function hasHotelAccess(payload: TokenPayload, hotelId: string): boolean 
   if (payload.role === 'SUPER_ADMIN') return true
   return payload.hotelId === hotelId
 }
-
-export const HOTEL_ROLES: Role[] = ['OWNER', 'MANAGER', 'RECEPTIONIST', 'KITCHEN']
-export const MANAGEMENT_ROLES: Role[] = ['OWNER', 'MANAGER']

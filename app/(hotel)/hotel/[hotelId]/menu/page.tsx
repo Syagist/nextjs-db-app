@@ -6,8 +6,9 @@ import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { MenuItem } from '@/types'
+import { MENU_CATEGORIES } from '@/lib/constants'
 
-const CATEGORIES = ['Breakfast', 'Lunch', 'Dinner', 'Beverages', 'Snacks', 'Desserts']
+const CATEGORIES = MENU_CATEGORIES
 
 const DEFAULT_FORM = { name: '', price: '', category: 'Breakfast' }
 

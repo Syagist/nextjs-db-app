@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { CAN_MANAGE_MENU } from '@/lib/constants'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -20,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'MANAGER', 'KITCHEN', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_MENU.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
@@ -48,7 +49,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'MANAGER', 'KITCHEN', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_MENU.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

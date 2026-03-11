@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 
-type BadgeVariant =
+export type BadgeVariant =
   | 'PENDING'
   | 'APPROVED'
   | 'REJECTED'
@@ -59,15 +59,16 @@ const labelMap: Record<BadgeVariant, string> = {
   SUPER_ADMIN: 'Super Admin',
 }
 
-export function Badge({ value }: { value: BadgeVariant }) {
+export function Badge({ value }: { value: string }) {
+  const v = value as BadgeVariant
   return (
     <span
       className={clsx(
         'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        variantClasses[value] ?? 'bg-slate-100 text-slate-700',
+        variantClasses[v] ?? 'bg-slate-100 text-slate-700',
       )}
     >
-      {labelMap[value] ?? value}
+      {labelMap[v] ?? v}
     </span>
   )
 }

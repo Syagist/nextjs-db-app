@@ -8,6 +8,7 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', exact: true },
   { href: '/admin/hotels', label: 'Hotels' },
   { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/overview', label: 'Overview' },
 ]
 
 export function AdminSidebar() {

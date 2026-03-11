@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(for f in \"app/\\(hotel\\)/hotel/[hotelId]/layout.tsx\" \"app/api/hotel/[hotelId]/rooms/route.ts\" \"app/api/hotel/[hotelId]/rooms/[roomId]/route.ts\" \"app/api/hotel/[hotelId]/bookings/route.ts\" \"app/api/hotel/[hotelId]/staff/route.ts\" \"app/api/hotel/[hotelId]/staff/[staffId]/route.ts\" \"app/api/hotel/[hotelId]/menu/route.ts\" \"app/api/hotel/[hotelId]/menu/[itemId]/route.ts\" \"app/api/hotel/[hotelId]/orders/[orderId]/route.ts\")",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Read(//c/Users/user2/Desktop/Projects/nextjs-db-app/**)",
+      "Bash(done)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\user2\\Desktop\\Projects\\nextjs-db-app"
     ]
   }
 }

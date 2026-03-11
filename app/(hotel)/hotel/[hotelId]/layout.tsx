@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
 import { getTokenFromCookies } from '@/lib/auth'
+import { HOTEL_ROLES } from '@/lib/constants'
 import { prisma } from '@/lib/prisma'
 import { HotelSidebar } from '@/components/hotel/HotelSidebar'
-import { Role } from '@/types'
 
 export default async function HotelLayout({
   children,
@@ -15,8 +15,7 @@ export default async function HotelLayout({
   if (!payload) redirect('/login')
 
   const { hotelId } = await params
-  const hotelRoles: Role[] = ['OWNER', 'MANAGER', 'RECEPTIONIST', 'KITCHEN']
-  if (!hotelRoles.includes(payload.role)) redirect('/unauthorized')
+  if (!HOTEL_ROLES.includes(payload.role)) redirect('/unauthorized')
   if (payload.hotelId !== hotelId) redirect('/unauthorized')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

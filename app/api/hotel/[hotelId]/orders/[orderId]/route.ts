@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { ORDER_STATUSES } from '@/lib/constants'
 
 const updateSchema = z.object({
-  status: z.enum(['PENDING', 'PREPARING', 'SERVED', 'CANCELLED']),
+  status: z.enum(ORDER_STATUSES as [string, ...string[]]),
 })
 
 type Params = { params: Promise<{ hotelId: string; orderId: string }> }

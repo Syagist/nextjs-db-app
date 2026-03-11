@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/Badge'
 import { HotelStatus } from '@/types'
 
 interface Hotel {
   id: string
   name: string
+  slug: string
   location: string
   description: string | null
   status: HotelStatus
@@ -54,7 +56,6 @@ export default function AdminHotelsPage() {
             <thead>
               <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <th className="px-6 py-4">Hotel</th>
-                <th className="px-6 py-4">Location</th>
                 <th className="px-6 py-4">Staff</th>
                 <th className="px-6 py-4">Rooms</th>
                 <th className="px-6 py-4">Bookings</th>
@@ -67,9 +68,17 @@ export default function AdminHotelsPage() {
                 <tr key={hotel.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4">
                     <p className="font-medium text-slate-900">{hotel.name}</p>
-                    <p className="text-xs text-slate-400">{hotel.id.slice(0, 8)}…</p>
+                    <p className="text-xs text-slate-400">{hotel.location}</p>
+                    {hotel.status === 'APPROVED' && hotel.slug && (
+                      <Link
+                        href={`/stay/${hotel.slug}`}
+                        target="_blank"
+                        className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                      >
+                        View landing page ↗
+                      </Link>
+                    )}
                   </td>
-                  <td className="px-6 py-4 text-slate-600">{hotel.location}</td>
                   <td className="px-6 py-4 text-slate-600">{hotel._count.users}</td>
                   <td className="px-6 py-4 text-slate-600">{hotel._count.rooms}</td>
                   <td className="px-6 py-4 text-slate-600">{hotel._count.bookings}</td>
@@ -111,7 +120,7 @@ export default function AdminHotelsPage() {
               ))}
               {hotels.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-slate-400">
+                  <td colSpan={6} className="px-6 py-10 text-center text-slate-400">
                     No hotels found.
                   </td>
                 </tr>

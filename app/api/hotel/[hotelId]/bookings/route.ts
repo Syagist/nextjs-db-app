@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { verifyRequestToken, hasHotelAccess } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { CAN_MANAGE_BOOKINGS } from '@/lib/constants'
 
 const createSchema = z.object({
   roomId: z.string().min(1),
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ hot
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  if (!['OWNER', 'MANAGER', 'RECEPTIONIST', 'SUPER_ADMIN'].includes(payload.role)) {
+  if (!CAN_MANAGE_BOOKINGS.includes(payload.role)) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 

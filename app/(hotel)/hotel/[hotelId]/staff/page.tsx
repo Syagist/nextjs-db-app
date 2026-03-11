@@ -7,8 +7,7 @@ import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { StaffMember, Role } from '@/types'
-
-const ROLES: Role[] = ['MANAGER', 'RECEPTIONIST', 'KITCHEN']
+import { ASSIGNABLE_ROLES } from '@/lib/constants'
 
 const DEFAULT_FORM = { name: '', email: '', password: '', role: 'RECEPTIONIST' as Role }
 
@@ -94,7 +93,7 @@ export default function StaffPage() {
 
           <FormField label="Role">
             <Select value={form.role} onChange={(e) => set('role', e.target.value as Role)}>
-              {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+              {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </Select>
           </FormField>
 
