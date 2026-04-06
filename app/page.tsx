@@ -32,11 +32,11 @@ export default async function HomePage() {
             <span className="ml-2 text-xs font-medium text-slate-400">Hotel Management Platform</span>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            <Link href="/auth/login" className="text-sm font-medium text-slate-600 hover:text-slate-900">
               Sign In
             </Link>
             <Link
-              href="/register"
+              href="/auth/register"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
               Register Hotel
@@ -56,13 +56,13 @@ export default async function HomePage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/register"
+              href="/auth/register"
               className="rounded-lg bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-400"
             >
               List Your Hotel
             </Link>
             <Link
-              href="/login"
+              href="/auth/login"
               className="rounded-lg border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:bg-slate-700"
             >
               Sign In
@@ -79,7 +79,7 @@ export default async function HomePage() {
         {hotels.length === 0 ? (
           <div className="rounded-xl bg-white py-16 text-center shadow-sm ring-1 ring-slate-200">
             <p className="text-slate-400">No hotels available yet.</p>
-            <Link href="/register" className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline">
+            <Link href="/auth/register" className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline">
               Be the first to register →
             </Link>
           </div>
@@ -111,7 +111,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-xl px-6">
           <h2 className="text-2xl font-bold text-slate-900">Ready to manage your hotel?</h2>
           <p className="mt-3 text-slate-500">Register your property and get approved to start managing bookings, rooms, and more.</p>
-          <Link href="/register" className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+          <Link href="/auth/register" className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
             Get Started
           </Link>
         </div>

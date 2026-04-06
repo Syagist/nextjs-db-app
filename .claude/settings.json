@@ -6,7 +6,9 @@
       "Bash(do)",
       "Bash(echo \"=== $f ===\")",
       "Read(//c/Users/user2/Desktop/Projects/nextjs-db-app/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const p=require\\(''./package.json''\\); console.log\\(''rhf:'', p.dependencies[''react-hook-form''], ''resolvers:'', p.dependencies[''@hookform/resolvers''], ''debounce:'', p.dependencies[''use-debounce'']\\)\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\user2\\Desktop\\Projects\\nextjs-db-app"

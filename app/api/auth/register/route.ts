@@ -53,6 +53,7 @@ export async function POST(req: Request) {
           slug: `${hotelName}-${hotelLocation}`,
           location: hotelLocation,
           description: hotelDescription ?? null,
+          amenities: [],
           status: HotelStatus.PENDING,
         },
       });

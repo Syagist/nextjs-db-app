@@ -2,12 +2,15 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import type { Order, OrderStatus, MenuItem } from '@/types'
+import type { Order, MenuItem } from '@/types'
 import { ORDER_STATUS_FLOW, OrderStatus as OS } from '@/lib/constants'
+import { orderSchema, type OrderForm } from '@/lib/schemas'
 
 export default function OrdersPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -16,8 +19,14 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [roomNumber, setRoomNumber] = useState('')
   const [selectedItems, setSelectedItems] = useState<{ menuItemId: string; quantity: number }[]>([])
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<OrderForm>({ resolver: zodResolver(orderSchema) })
 
   const fetchAll = useCallback(async () => {
     const [o, m] = await Promise.all([
@@ -32,9 +41,9 @@ export default function OrdersPage() {
   useEffect(() => { fetchAll() }, [fetchAll])
 
   function closeForm() {
-    setShowForm(false)
-    setRoomNumber('')
+    reset()
     setSelectedItems([])
+    setShowForm(false)
   }
 
   function toggleItem(menuItemId: string) {
@@ -52,21 +61,20 @@ export default function OrdersPage() {
     )
   }
 
-  async function handleCreate(e: { preventDefault(): void }) {
-    e.preventDefault()
+  async function onCreate(data: OrderForm) {
     if (!selectedItems.length) return
     setSaving(true)
     await fetch(`/api/hotel/${hotelId}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ roomNumber, items: selectedItems }),
+      body: JSON.stringify({ roomNumber: data.roomNumber, items: selectedItems }),
     })
     await fetchAll()
     setSaving(false)
     closeForm()
   }
 
-  async function updateStatus(id: string, status: OrderStatus) {
+  async function updateStatus(id: string, status: typeof OS[keyof typeof OS]) {
     await fetch(`/api/hotel/${hotelId}/orders/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -84,13 +92,12 @@ export default function OrdersPage() {
       />
 
       <Modal isOpen={showForm} onClose={closeForm} title="New Room Order" width="lg">
-        <form onSubmit={handleCreate} className="space-y-4">
-          <FormField label="Room Number">
+        <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
+          <FormField label="Room Number" error={errors.roomNumber?.message}>
             <Input
-              value={roomNumber}
-              onChange={(e) => setRoomNumber(e.target.value)}
-              required
+              error={!!errors.roomNumber}
               placeholder="e.g. 201"
+              {...register('roomNumber')}
             />
           </FormField>
 

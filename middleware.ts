@@ -3,7 +3,7 @@ import { verifyToken } from '@/lib/auth'
 import { HOTEL_ROLES } from '@/lib/constants'
 import { Role } from '@/types'
 
-const AUTH_ROUTES = ['/login', '/register']
+const AUTH_ROUTES = ['/login', '/auth/register']
 const ADMIN_ROUTES = ['/admin']
 const HOTEL_ROUTES = ['/hotel']
 
@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
   // Hotel workspace routes: require any hotel role
   if (HOTEL_ROUTES.some((r) => pathname.startsWith(r))) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL(`/login?from=${pathname}`, req.url))
+      return NextResponse.redirect(new URL(`auth/login?from=${pathname}`, req.url))
     }
 
     if (!HOTEL_ROLES.includes(role!)) {
@@ -62,7 +62,7 @@ export async function middleware(req: NextRequest) {
   // Pending page: require authenticated non-super-admin
   if (pathname.startsWith('/pending')) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/login', req.url))
+      return NextResponse.redirect(new URL('auth/login', req.url))
     }
     return NextResponse.next()
   }
@@ -81,7 +81,7 @@ export const config = {
     '/admin/:path*',
     '/hotel/:path*',
     '/login',
-    '/register',
+    '/auth/register',
     '/pending',
     '/unauthorized',
   ],

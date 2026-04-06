@@ -2,14 +2,16 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import type { Booking, BookingStatus, Room } from '@/types'
 import { BOOKING_STATUSES, BOOKING_STATUS_FLOW, BookingStatus as BS, RoomStatus } from '@/lib/constants'
-
-const DEFAULT_FORM = { roomId: '', guestName: '', guestPhone: '', checkIn: '', checkOut: '' }
+import { bookingSchema, type BookingForm } from '@/lib/schemas'
+import { useDebounce } from 'use-debounce'
 
 const ALL_STATUSES = BOOKING_STATUSES
 
@@ -206,8 +208,15 @@ export default function BookingsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(DEFAULT_FORM)
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
+  const [debouncedGuest] = useDebounce(filters.guest, 300)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<BookingForm>({ resolver: zodResolver(bookingSchema) })
 
   const fetchAll = useCallback(async () => {
     const [b, r] = await Promise.all([
@@ -222,21 +231,21 @@ export default function BookingsPage() {
   useEffect(() => { fetchAll() }, [fetchAll])
 
   function closeForm() {
+    reset()
     setShowForm(false)
-    setForm(DEFAULT_FORM)
   }
 
-  function setField<K extends keyof typeof form>(key: K, value: string) {
-    setForm((f) => ({ ...f, [key]: value }))
+  function openForm() {
+    reset()
+    setShowForm(true)
   }
 
-  async function handleCreate(e: { preventDefault(): void }) {
-    e.preventDefault()
+  async function onCreate(data: BookingForm) {
     setSaving(true)
     await fetch(`/api/hotel/${hotelId}/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(data),
     })
     await fetchAll()
     setSaving(false)
@@ -264,16 +273,15 @@ export default function BookingsPage() {
     return n
   }, [filters])
 
-  // Apply all filters
+  // Apply all filters (guest search is debounced 300ms)
   const filtered = useMemo(() => {
     return bookings.filter((b) => {
-      if (filters.guest && !b.guestName.toLowerCase().includes(filters.guest.toLowerCase())) return false
+      if (debouncedGuest && !b.guestName.toLowerCase().includes(debouncedGuest.toLowerCase())) return false
       if (filters.roomId && b.room?.id !== filters.roomId) return false
       if (filters.checkInToday && !isToday(b.checkIn)) return false
       if (filters.checkOutToday && !isToday(b.checkOut)) return false
       if (filters.statuses.size && !filters.statuses.has(b.status)) return false
       if (filters.actions.size) {
-        // Booking must have at least one of the selected actions available
         const hasAction = [...filters.actions].some((a) => {
           const requiredStatuses = ACTION_STATUS_MAP[a]
           return requiredStatuses.includes(b.status)
@@ -282,20 +290,20 @@ export default function BookingsPage() {
       }
       return true
     })
-  }, [bookings, filters])
+  }, [bookings, filters, debouncedGuest])
 
   return (
     <div className="p-8">
       <PageHeader
         title="Bookings"
         subtitle="Manage guest reservations"
-        action={{ label: 'New Booking', onClick: () => setShowForm(true) }}
+        action={{ label: 'New Booking', onClick: openForm }}
       />
 
       <Modal isOpen={showForm} onClose={closeForm} title="New Booking">
-        <form onSubmit={handleCreate} className="space-y-4">
-          <FormField label="Room">
-            <Select value={form.roomId} onChange={(e) => setField('roomId', e.target.value)} required>
+        <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
+          <FormField label="Room" error={errors.roomId?.message}>
+            <Select {...register('roomId')} error={!!errors.roomId}>
               <option value="">Select a room</option>
               {rooms.filter((r) => r.status === RoomStatus.AVAILABLE).map((r) => (
                 <option key={r.id} value={r.id}>{r.name} — ${Number(r.price)}/night</option>
@@ -303,20 +311,20 @@ export default function BookingsPage() {
             </Select>
           </FormField>
 
-          <FormField label="Guest Name">
-            <Input value={form.guestName} onChange={(e) => setField('guestName', e.target.value)} required />
+          <FormField label="Guest Name" error={errors.guestName?.message}>
+            <Input {...register('guestName')} error={!!errors.guestName} />
           </FormField>
 
-          <FormField label="Guest Phone">
-            <Input value={form.guestPhone} onChange={(e) => setField('guestPhone', e.target.value)} required />
+          <FormField label="Guest Phone" error={errors.guestPhone?.message}>
+            <Input {...register('guestPhone')} error={!!errors.guestPhone} />
           </FormField>
 
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Check In">
-              <Input type="date" value={form.checkIn} onChange={(e) => setField('checkIn', e.target.value)} required />
+            <FormField label="Check In" error={errors.checkIn?.message}>
+              <Input type="date" {...register('checkIn')} error={!!errors.checkIn} />
             </FormField>
-            <FormField label="Check Out">
-              <Input type="date" value={form.checkOut} onChange={(e) => setField('checkOut', e.target.value)} required />
+            <FormField label="Check Out" error={errors.checkOut?.message}>
+              <Input type="date" {...register('checkOut')} error={!!errors.checkOut} />
             </FormField>
           </div>
 

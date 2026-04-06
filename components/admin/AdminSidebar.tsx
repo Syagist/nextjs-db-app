@@ -17,7 +17,7 @@ export function AdminSidebar() {
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/login')
+    router.push('/auth/login')
     router.refresh()
   }
 

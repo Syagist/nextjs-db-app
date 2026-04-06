@@ -7,7 +7,7 @@ export default async function SuperAdminLayout({ children }: { children: React.R
   const payload = await getTokenFromCookies()
 
   if (!payload || payload.role !== Role.SUPER_ADMIN) {
-    redirect('/login')
+    redirect('/auth/login')
   }
 
   return (

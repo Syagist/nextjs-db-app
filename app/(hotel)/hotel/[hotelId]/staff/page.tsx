@@ -2,14 +2,15 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import type { StaffMember, Role } from '@/types'
-import { ASSIGNABLE_ROLES, Role as RoleConst } from '@/lib/constants'
-
-const DEFAULT_FORM = { name: '', email: '', password: '', role: RoleConst.RECEPTIONIST as Role }
+import type { StaffMember } from '@/types'
+import { ASSIGNABLE_ROLES } from '@/lib/constants'
+import { staffSchema, type StaffForm } from '@/lib/schemas'
 
 export default function StaffPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -17,8 +18,14 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [form, setForm] = useState(DEFAULT_FORM)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm<StaffForm>({ resolver: zodResolver(staffSchema) })
 
   const fetchStaff = useCallback(async () => {
     const res = await fetch(`/api/hotel/${hotelId}/staff`)
@@ -30,27 +37,20 @@ export default function StaffPage() {
   useEffect(() => { fetchStaff() }, [fetchStaff])
 
   function closeForm() {
+    reset()
     setShowForm(false)
-    setError('')
-    setForm(DEFAULT_FORM)
   }
 
-  function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
-  async function handleCreate(e: { preventDefault(): void }) {
-    e.preventDefault()
+  async function onCreate(data: StaffForm) {
     setSaving(true)
-    setError('')
     const res = await fetch(`/api/hotel/${hotelId}/staff`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+      body: JSON.stringify(data),
     })
-    const data = await res.json()
+    const json = await res.json()
     if (!res.ok) {
-      setError(data.error)
+      setError('root', { message: json.error })
       setSaving(false)
       return
     }
@@ -74,25 +74,25 @@ export default function StaffPage() {
       />
 
       <Modal isOpen={showForm} onClose={closeForm} title="Add Staff Member">
-        <form onSubmit={handleCreate} className="space-y-4">
-          {error && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
+          {errors.root && (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{errors.root.message}</p>
           )}
 
-          <FormField label="Full Name">
-            <Input value={form.name} onChange={(e) => set('name', e.target.value)} required />
+          <FormField label="Full Name" error={errors.name?.message}>
+            <Input error={!!errors.name} {...register('name')} />
           </FormField>
 
-          <FormField label="Email">
-            <Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required />
+          <FormField label="Email" error={errors.email?.message}>
+            <Input type="email" error={!!errors.email} {...register('email')} />
           </FormField>
 
-          <FormField label="Password">
-            <Input type="password" value={form.password} onChange={(e) => set('password', e.target.value)} required minLength={6} />
+          <FormField label="Password" error={errors.password?.message}>
+            <Input type="password" error={!!errors.password} {...register('password')} />
           </FormField>
 
-          <FormField label="Role">
-            <Select value={form.role} onChange={(e) => set('role', e.target.value as Role)}>
+          <FormField label="Role" error={errors.role?.message}>
+            <Select {...register('role')} error={!!errors.role}>
               {ASSIGNABLE_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
             </Select>
           </FormField>

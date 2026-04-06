@@ -32,7 +32,7 @@ export default async function PublicHotelPage({ params }: { params: Promise<{ ho
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <Link href="/" className="text-xl font-bold text-slate-900">HotelHub</Link>
-          <Link href="/login" className="text-sm font-medium text-blue-600 hover:underline">Sign In</Link>
+          <Link href="/auth/login" className="text-sm font-medium text-blue-600 hover:underline">Sign In</Link>
         </div>
       </header>
 
@@ -83,7 +83,7 @@ export default async function PublicHotelPage({ params }: { params: Promise<{ ho
         <div className="mt-12 rounded-xl bg-blue-50 p-6 text-center ring-1 ring-blue-200">
           <p className="font-semibold text-slate-900">Want to book a room?</p>
           <p className="mt-1 text-sm text-slate-500">Contact {hotel.name} directly or sign in to make a reservation.</p>
-          <Link href="/login" className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
+          <Link href="/auth/login" className="mt-4 inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700">
             Sign In to Book
           </Link>
         </div>

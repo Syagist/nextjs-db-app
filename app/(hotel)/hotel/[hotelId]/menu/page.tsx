@@ -2,15 +2,14 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { MenuItem } from '@/types'
 import { MENU_CATEGORIES } from '@/lib/constants'
-
-const CATEGORIES = MENU_CATEGORIES
-
-const DEFAULT_FORM = { name: '', price: '', category: 'Breakfast' }
+import { menuItemSchema, type MenuItemForm } from '@/lib/schemas'
 
 export default function MenuPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -19,7 +18,13 @@ export default function MenuPage() {
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState(DEFAULT_FORM)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<MenuItemForm>({ resolver: zodResolver(menuItemSchema) as any })
 
   const fetchItems = useCallback(async () => {
     const res = await fetch(`/api/hotel/${hotelId}/menu`)
@@ -32,34 +37,29 @@ export default function MenuPage() {
 
   function openCreate() {
     setEditItem(null)
-    setForm(DEFAULT_FORM)
+    reset({ name: '', price: undefined, category: 'Breakfast' })
     setShowForm(true)
   }
 
   function openEdit(item: MenuItem) {
     setEditItem(item)
-    setForm({ name: item.name, price: String(item.price), category: item.category })
+    reset({ name: item.name, price: Number(item.price), category: item.category })
     setShowForm(true)
   }
 
   function closeForm() {
+    reset()
     setShowForm(false)
     setEditItem(null)
   }
 
-  function set<K extends keyof typeof form>(key: K, value: string) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
-  async function handleSave(e: { preventDefault(): void }) {
-    e.preventDefault()
+  async function onSave(data: MenuItemForm) {
     setSaving(true)
-    const payload = { name: form.name, price: Number(form.price), category: form.category }
     const url = editItem ? `/api/hotel/${hotelId}/menu/${editItem.id}` : `/api/hotel/${hotelId}/menu`
     await fetch(url, {
       method: editItem ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(data),
     })
     await fetchItems()
     setSaving(false)
@@ -72,7 +72,7 @@ export default function MenuPage() {
     fetchItems()
   }
 
-  const grouped = CATEGORIES.reduce<Record<string, MenuItem[]>>((acc, cat) => {
+  const grouped = MENU_CATEGORIES.reduce<Record<string, MenuItem[]>>((acc, cat) => {
     const catItems = items.filter((i) => i.category === cat)
     if (catItems.length) acc[cat] = catItems
     return acc
@@ -87,18 +87,18 @@ export default function MenuPage() {
       />
 
       <Modal isOpen={showForm} onClose={closeForm} title={editItem ? 'Edit Item' : 'Add Menu Item'} width="sm">
-        <form onSubmit={handleSave} className="space-y-4">
-          <FormField label="Item Name">
-            <Input value={form.name} onChange={(e) => set('name', e.target.value)} required />
+        <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+          <FormField label="Item Name" error={errors.name?.message}>
+            <Input error={!!errors.name} {...register('name')} />
           </FormField>
 
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Price ($)">
-              <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value)} required />
+            <FormField label="Price ($)" error={errors.price?.message}>
+              <Input type="number" min="0" step="0.01" error={!!errors.price} {...register('price', { valueAsNumber: true })} />
             </FormField>
-            <FormField label="Category">
-              <Select value={form.category} onChange={(e) => set('category', e.target.value)}>
-                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            <FormField label="Category" error={errors.category?.message}>
+              <Select error={!!errors.category} {...register('category')}>
+                {MENU_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
               </Select>
             </FormField>
           </div>

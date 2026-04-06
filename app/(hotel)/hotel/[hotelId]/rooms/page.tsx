@@ -2,14 +2,15 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { Badge } from '@/components/ui/Badge'
 import { Modal, ModalFooter } from '@/components/ui/Modal'
 import { FormField, Input, Select } from '@/components/ui/Field'
 import { PageHeader } from '@/components/ui/PageHeader'
-import type { Room, RoomStatus } from '@/types'
+import type { Room } from '@/types'
 import { ROOM_TYPES, RoomStatus as RS } from '@/lib/constants'
-
-const DEFAULT_FORM = { name: '', type: 'Standard', price: '', capacity: '', status: RS.AVAILABLE as RoomStatus }
+import { roomSchema, type RoomForm } from '@/lib/schemas'
 
 export default function RoomsPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
@@ -17,8 +18,14 @@ export default function RoomsPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editRoom, setEditRoom] = useState<Room | null>(null)
-  const [form, setForm] = useState(DEFAULT_FORM)
   const [saving, setSaving] = useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RoomForm>({ resolver: zodResolver(roomSchema) as any })
 
   const fetchRooms = useCallback(async () => {
     const res = await fetch(`/api/hotel/${hotelId}/rooms`)
@@ -31,34 +38,35 @@ export default function RoomsPage() {
 
   function openCreate() {
     setEditRoom(null)
-    setForm(DEFAULT_FORM)
+    reset({ name: '', type: 'Standard', price: undefined, capacity: undefined, status: RS.AVAILABLE })
     setShowForm(true)
   }
 
   function openEdit(room: Room) {
     setEditRoom(room)
-    setForm({ name: room.name, type: room.type, price: String(room.price), capacity: String(room.capacity), status: room.status })
+    reset({
+      name: room.name,
+      type: room.type,
+      price: Number(room.price),
+      capacity: Number(room.capacity),
+      status: room.status,
+    })
     setShowForm(true)
   }
 
   function closeForm() {
+    reset()
     setShowForm(false)
     setEditRoom(null)
   }
 
-  function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
-    setForm((f) => ({ ...f, [key]: value }))
-  }
-
-  async function handleSave(e: { preventDefault(): void }) {
-    e.preventDefault()
+  async function onSave(data: RoomForm) {
     setSaving(true)
-    const payload = { name: form.name, type: form.type, price: Number(form.price), capacity: Number(form.capacity), status: form.status }
     const url = editRoom ? `/api/hotel/${hotelId}/rooms/${editRoom.id}` : `/api/hotel/${hotelId}/rooms`
     await fetch(url, {
       method: editRoom ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(data),
     })
     await fetchRooms()
     setSaving(false)
@@ -80,19 +88,19 @@ export default function RoomsPage() {
       />
 
       <Modal isOpen={showForm} onClose={closeForm} title={editRoom ? 'Edit Room' : 'Add Room'}>
-        <form onSubmit={handleSave} className="space-y-4">
-          <FormField label="Room Name">
-            <Input value={form.name} onChange={(e) => set('name', e.target.value)} required />
+        <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+          <FormField label="Room Name" error={errors.name?.message}>
+            <Input error={!!errors.name} {...register('name')} />
           </FormField>
 
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Type">
-              <Select value={form.type} onChange={(e) => set('type', e.target.value)}>
+            <FormField label="Type" error={errors.type?.message}>
+              <Select error={!!errors.type} {...register('type')}>
                 {ROOM_TYPES.map((t) => <option key={t}>{t}</option>)}
               </Select>
             </FormField>
             <FormField label="Status">
-              <Select value={form.status} onChange={(e) => set('status', e.target.value as RoomStatus)}>
+              <Select {...register('status')}>
                 <option value={RS.AVAILABLE}>Available</option>
                 <option value={RS.OCCUPIED}>Occupied</option>
                 <option value={RS.MAINTENANCE}>Maintenance</option>
@@ -101,11 +109,11 @@ export default function RoomsPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="Price / night ($)">
-              <Input type="number" min="0" step="0.01" value={form.price} onChange={(e) => set('price', e.target.value)} required />
+            <FormField label="Price / night ($)" error={errors.price?.message}>
+              <Input type="number" min="0" step="0.01" error={!!errors.price} {...register('price', { valueAsNumber: true })} />
             </FormField>
-            <FormField label="Capacity">
-              <Input type="number" min="1" value={form.capacity} onChange={(e) => set('capacity', e.target.value)} required />
+            <FormField label="Capacity" error={errors.capacity?.message}>
+              <Input type="number" min="1" error={!!errors.capacity} {...register('capacity', { valueAsNumber: true })} />
             </FormField>
           </div>
 

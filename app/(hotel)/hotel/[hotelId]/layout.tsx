@@ -12,7 +12,7 @@ export default async function HotelLayout({
   params: Promise<{ hotelId: string }>
 }) {
   const payload = await getTokenFromCookies()
-  if (!payload) redirect('/login')
+  if (!payload) redirect('/auth/login')
 
   const { hotelId } = await params
   if (!HOTEL_ROLES.includes(payload.role)) redirect('/unauthorized')
